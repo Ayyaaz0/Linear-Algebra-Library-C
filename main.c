@@ -1,42 +1,33 @@
+// main.c
 #include <stdio.h>
 #include <stdbool.h>
 #include "input.h"
 #include "linalg.h"
-#include "stats.h"
-
-static void main_menu(void);
 
 int main(void) {
-    main_menu();
-    return 0;
-}
+    int selection;
+    bool running = true;
 
-static void main_menu(void) {
-  bool running = true;
+    while (running) {
+        printf("\n===== Linear Algebra Calculator =====\n");
+        printf("1. Add n matrices\n");
+        printf("0. Exit\n");
+        printf("=====================================\n");
 
-  while (running) {
-    printf("\n==== Numerical Toolkit ====\n");
-    printf("1. Linear Algebera Tool\n");
-    printf("2. Statistics Tool\n");
-    printf("0. Exit\n");
-    printf("===========================\n");
+        selection = get_int("Enter an option: ");
 
-    int selection = get_int("Select an option: ");
-
-    switch (selection) {
-        case 1:
-            linalg_menu();
-            break;
-        case 2:
-            printf("Sub menu for statistics placeholder\n");
-            break;
-        case 0:
-            printf("EXITING PROGRAM");
-            running = false;
-            break;
-        default:
-            printf("Invalid Option. Try again.\n");
-            break;
+        switch (selection) {
+            case 1:
+                linalg_add_n();
+                break;
+            case 0:
+                printf("EXIT\n");
+                running = false;
+                break;
+            default:
+                printf("Unknown option.\n");
+                break;
+        }
     }
-  }
+    return 0;
 }
