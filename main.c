@@ -12,6 +12,7 @@ int main(void) {
         printf("\n===== Linear Algebra Calculator =====\n");
         printf("1. Add n matrices\n");
         printf("2. Subtract N matrices\n");
+        printf("3. Multiply A B matrices together\n");
         printf("0. Exit\n");
         printf("=====================================\n");
 
@@ -24,6 +25,8 @@ int main(void) {
             case 2:
                 linalg_sub_n();
                 break;
+            case 3:
+                linalg_multiply();
             case 0:
                 printf("EXIT\n");
                 running = false;

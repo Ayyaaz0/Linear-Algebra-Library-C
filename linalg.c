@@ -5,9 +5,11 @@
 static void input_matrix(Matrix *m);
 static void print_matrix(const Matrix *m);
 static void matrix_elementwise_op(Matrix *sum, const Matrix *m, double factor);
+static void multiply_matrices(const Matrix *a, const Matrix *b, Matrix *result);
 
 void linalg_add_n(void) {
-  int count = get_int_in_range("How many matrices do you want to add? (2-10) ", 2, 10);
+  int count =
+      get_int_in_range("How many matrices do you want to add? (2-10) ", 2, 10);
 
   Matrix sum, M;
   sum.rows = get_int_in_range("Rows (1-10):  ", 1, MAX);
@@ -30,7 +32,7 @@ void linalg_add_n(void) {
 
     M.rows = sum.rows;
     M.cols = sum.cols;
-    
+
     input_matrix(&M);
     matrix_elementwise_op(&sum, &M, +1.0); // addition
   }
@@ -40,7 +42,8 @@ void linalg_add_n(void) {
 }
 
 void linalg_sub_n(void) {
-  int count = get_int_in_range("How many matrices do you want to subtract? (2-10) ", 2, 10);
+  int count = get_int_in_range(
+      "How many matrices do you want to subtract? (2-10) ", 2, 10);
 
   Matrix sum, M;
   sum.rows = get_int_in_range("Rows (1-10):  ", 1, MAX);
@@ -57,11 +60,35 @@ void linalg_sub_n(void) {
     M.cols = sum.cols;
 
     input_matrix(&M);
-    matrix_elementwise_op(&sum, &M, -1.0); //subtraction
+    matrix_elementwise_op(&sum, &M, -1.0); // subtraction
   }
 
   printf("\nFinal result (M1 minus the other %d matrices):\n", count - 1);
   print_matrix(&sum);
+}
+
+void linalg_multiply(void) {
+    Matrix A, B, Result;
+
+    A.rows = get_int_in_range("Rows of A (1-10); ", 1, MAX);
+    A.cols = get_int_in_range("Cols of A (1-10): ", 1, MAX);
+    B.rows = get_int_in_range("Rows of B (1-10): ", 1, MAX);
+    B.cols = get_int_in_range("Cols of B (1-10): ", 1, MAX);
+
+    if (A.cols != B.rows) {
+        printf("Cannot multiply: cols(A) must equal rows(B).\n");
+        return;
+    }
+
+    printf("\n===== MATRIX (A) =====\n");
+    input_matrix(&A);
+    printf("\n===== MATRIX (B) =====\n");
+    input_matrix(&B);
+
+    multiply_matrices(&A, &B, &Result);
+
+    printf("\nResult (A * B):\n");
+    print_matrix(&Result);
 }
 
 //--------------------- Helper Functions -----------------------//
@@ -80,7 +107,7 @@ static void input_matrix(Matrix *m) {
 
     for (int j = 0; j < m->cols; j++) {
       char prompt[PROMPT_LEN];
-      
+
       snprintf(prompt, sizeof(prompt), "  a[%d][%d] = ", i, j);
       m->data[i][j] = get_double(prompt);
     }
@@ -100,6 +127,21 @@ static void matrix_elementwise_op(Matrix *sum, const Matrix *m, double factor) {
   for (int i = 0; i < sum->rows; i++) {
     for (int j = 0; j < sum->cols; j++) {
       sum->data[i][j] += factor * m->data[i][j];
+    }
+  }
+}
+
+static void multiply_matrices(const Matrix *a, const Matrix *b,
+                              Matrix *result) {
+  result->rows = a->rows;
+  result->cols = b->cols;
+
+  for (int i = 0; i < a->rows; i++) {
+    for (int j = 0; j < b->cols; j++) {
+      result->data[i][j] = 0.0;
+      for (int k = 0; k < a->cols; k++) { //iterate row by column 
+        result->data[i][j] += a->data[i][k] * b->data[k][j]; //compute the dot product
+      }
     }
   }
 }
