@@ -4,6 +4,8 @@
 
 static void input_matrix(Matrix *m);
 static void print_matrix(const Matrix *m);
+static void print_labeled_matrix(const char *label, const Matrix *m);
+
 static void ask_matrix_dimensions(Matrix *m, const char *label);
 static void read_matrix_fixed_size(Matrix *m, const char *title);
 static void read_matrix_with_dims(Matrix *m, const char *title);   
@@ -15,9 +17,8 @@ static void multiply_matrices(const Matrix *a, const Matrix *b, Matrix *result);
 static void transpose_matrix(const Matrix *m, Matrix *t);
 
 void linalg_add_n(void) {
-  int count =
-      get_int_in_range("How many matrices do you want to add? (2-10) ", 2, MAX_MATRICES);
-  Matrix sum, input;
+  int count = get_int_in_range("How many matrices do you want to add? (2-10) ", 2, MAX_MATRICES);
+  Matrix sum, input, prev_sum;
 
   // Choose size for all matrices
   ask_matrix_dimensions(&sum, "Enter a size for all matrices to add:");
@@ -26,17 +27,21 @@ void linalg_add_n(void) {
   // Read matrices and accumulate
   for (int k = 1; k <= count; k++) {
     char title[64];
-    if (k == 1) {
-      snprintf(title, sizeof(title), "Matrix %d (starting matrix)", k);
-    } else {
-      snprintf(title, sizeof(title), "Matrix %d (added to sum)", k);
-    }
+    snprintf(title, sizeof(title), "Matrix %d", k);
 
     input.rows = sum.rows;
     input.cols = sum.cols;
     read_matrix_fixed_size(&input, title);
 
+    prev_sum = sum; // save previous result for formatting
+
     matrix_add_inplace(&sum, &input);
+
+    // Format the output for user
+    printf("\nStep %d. After adding matrix %d\n", k, k);
+    print_labeled_matrix("Previous sum:", &prev_sum);
+    print_labeled_matrix("Matrix to add by:", &input);
+    print_labeled_matrix("New Sum:", &sum);
   }
 
   printf("\nFinal result (sum of %d matrices):\n", count);
@@ -44,37 +49,47 @@ void linalg_add_n(void) {
 }
 
 void linalg_sub_n(void) {
-  int count =
-      get_int_in_range("How many matrices do you want to subtract? (2-10) ", 2, MAX_MATRICES);
+  int count = get_int_in_range("How many matrices do you want to subtract? (2-10) ", 2, MAX_MATRICES);
 
-  Matrix sum, input;
-  ask_matrix_dimensions(&sum, "Enter size for all matrices to subtract:");
-  read_matrix_fixed_size(&sum, "Matrix 1 (starting matrix)");  // Read first matrix into sum
+  Matrix result, input, prev_result;
+  ask_matrix_dimensions(&result, "Enter size for all matrices to subtract:");
+  read_matrix_fixed_size(&result, "Matrix 1 (starting matrix)");  // Read first matrix into result
 
-  // Subtract the remaining matrices from sum
+  // Subtract the remaining matrices from result
   for (int k = 2; k <= count; k++) {
     char title[64];
     snprintf(title, sizeof(title), "Matrix %d (to subtract)", k);
 
-    input.rows = sum.rows;
-    input.cols = sum.cols;
+    input.rows = result.rows;
+    input.cols = result.cols;
     read_matrix_fixed_size(&input, title);
 
-    matrix_sub_inplace(&sum, &input);
+    prev_result = result; //save previous result for formatting
+
+    matrix_sub_inplace(&result, &input);
+
+    //Format for the user
+    printf("\nStep %d. After subtracting matrix %d\n" , k - 1, k);
+    print_labeled_matrix("Previous result:", &prev_result);
+    print_labeled_matrix("Matrix to subtract by:", &input);
+    print_labeled_matrix("New result:", &result);
   }
 
   printf("\nFinal result (M1 minus the other %d matrices):\n", count - 1);
-  print_matrix(&sum);
+  print_matrix(&result);
 }
 
 void linalg_multiply_n(void) {
   int count =
       get_int_in_range("How many matrices to multiply? (2-10): ", 2, MAX_MATRICES);
 
-  Matrix result, current, temp;
+  Matrix result, current, temp, prev_result;
 
   // First matrix: ask for dimensions and values
   read_matrix_with_dims(&result, "Matrix 1 (starting matrix)");
+
+  printf("\nIntial result (after Matrix 1):\n");
+  print_labeled_matrix("Result", &result);
 
   for (int k = 2; k <= count; k++) {
     char title[64];
@@ -88,8 +103,17 @@ void linalg_multiply_n(void) {
              k, result.rows, result.cols, current.rows, current.cols);
       return;
     }
+    
+    prev_result = result;
 
     multiply_matrices(&result, &current, &temp); // temp = result * current
+
+    //Formatting for the user
+    printf("\nStep %d. After multiplying by matrix %d\n", k - 1, k);
+    print_labeled_matrix("Previous result:", &prev_result);
+    print_labeled_matrix("Matrix to multiply by:", &current);
+    print_labeled_matrix("New result:", &temp);
+
     result = temp;                               // copy temp matrix back into result
   }
 
@@ -103,13 +127,13 @@ void linalg_transpose(void) {
     printf("\nTranpose a Matrix:\n");
     read_matrix_with_dims(&input, "Enter matrix to transpose:");
 
-    printf("\nOriginal Matrix (%d x %d):\n", input.rows, input.cols);
-    print_matrix(&input);
-
     transpose_matrix(&input, &output);
 
+    printf("\nOriginal Matrix:\n");
+    print_labeled_matrix("A", &input);
+
     printf("\nTransposed Matrix (%d x %d):\n", output.rows, output.cols);
-    print_matrix(&output);
+    print_labeled_matrix("A^T", &output);
 }
 
 //--------------------- Helper Functions -----------------------//
@@ -142,6 +166,14 @@ static void print_matrix(const Matrix *m) {
     }
     printf("\n");
   }
+}
+
+static void print_labeled_matrix(const char *label, const Matrix *m) {
+  if (label && label[0] != '\0') {
+    printf("%s = \n", label);
+  }
+  print_matrix(m);
+  printf("\n");
 }
 
 // Ask user for rows & cols for a matrix.
