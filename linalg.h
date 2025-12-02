@@ -2,7 +2,7 @@
 #define LINALG_H
 
 #define MAX 10  // max rows/cols for matrices
-#define PROMPT_LEN 64 
+
 
 typedef struct {
     int rows;

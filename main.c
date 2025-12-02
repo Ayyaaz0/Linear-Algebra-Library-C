@@ -1,6 +1,7 @@
 // main.c
 #include <stdio.h>
 #include <stdbool.h>
+
 #include "input.h"
 #include "linalg.h"
 
@@ -27,6 +28,7 @@ int main(void) {
                 break;
             case 3:
                 linalg_multiply_n();
+                break;
             case 0:
                 printf("EXIT\n");
                 running = false;
