@@ -9,12 +9,13 @@ static void read_matrix_fixed_size(Matrix *m, const char *title);
 static void read_matrix_with_dims(Matrix *m, const char *title);   
 
 static void zero_matrix(Matrix *m);
-static void matrix_elementwise_op(Matrix *sum, const Matrix *m, double factor);
+static void matrix_add_inplace(Matrix *dest, const Matrix *src);
+static void matrix_sub_inplace(Matrix *dest, const Matrix *src);
 static void multiply_matrices(const Matrix *a, const Matrix *b, Matrix *result);
 
 void linalg_add_n(void) {
   int count =
-      get_int_in_range("How many matrices do you want to add? (2-10) ", 2, 10);
+      get_int_in_range("How many matrices do you want to add? (2-10) ", 2, MAX_MATRICES);
   Matrix sum, input;
 
   // Choose size for all matrices
@@ -33,7 +34,8 @@ void linalg_add_n(void) {
     input.rows = sum.rows;
     input.cols = sum.cols;
     read_matrix_fixed_size(&input, title);
-    matrix_elementwise_op(&sum, &input, +1.0);
+
+    matrix_add_inplace(&sum, &input);
   }
 
   printf("\nFinal result (sum of %d matrices):\n", count);
@@ -42,7 +44,7 @@ void linalg_add_n(void) {
 
 void linalg_sub_n(void) {
   int count =
-      get_int_in_range("How many matrices do you want to subtract? (2-10) ", 2, 10);
+      get_int_in_range("How many matrices do you want to subtract? (2-10) ", 2, MAX_MATRICES);
 
   Matrix sum, input;
   ask_matrix_dimensons(&sum, "Enter size for all matrices to subtract:");
@@ -57,7 +59,7 @@ void linalg_sub_n(void) {
     input.cols = sum.cols;
     read_matrix_fixed_size(&input, title);
 
-    matrix_elementwise_op(&sum, &input, -1.0);
+    matrix_sub_inplace(&sum, &input);
   }
 
   printf("\nFinal result (M1 minus the other %d matrices):\n", count - 1);
@@ -66,7 +68,7 @@ void linalg_sub_n(void) {
 
 void linalg_multiply_n(void) {
   int count =
-      get_int_in_range("How many matrices to multiply? (2-10): ", 2, 10);
+      get_int_in_range("How many matrices to multiply? (2-10): ", 2, MAX_MATRICES);
 
   Matrix result, current, temp;
 
@@ -162,10 +164,18 @@ static void read_matrix_with_dims(Matrix *m, const char *title) {
   input_matrix(m);
 }
 
-static void matrix_elementwise_op(Matrix *sum, const Matrix *m, double factor) {
-  for (int i = 0; i < sum->rows; i++) {
-    for (int j = 0; j < sum->cols; j++) {
-      sum->data[i][j] += factor * m->data[i][j]; // factor = +1.0 (addition) or -1.0 (subtraction)
+static void matrix_add_inplace(Matrix *dest, const Matrix *src) {
+  for (int i = 0; i < dest->rows; i++) {
+    for (int j = 0; j < dest->cols; j++) {
+      dest->data[i][j] += src->data[i][j];
+    }
+  }
+}
+
+static void matrix_sub_inplace(Matrix *dest, const Matrix *src) {
+  for (int i = 0; i < dest->rows; i++) {
+    for (int j = 0; j < dest->cols; j++) {
+      dest->data[i][j] -= src->data[i][j];
     }
   }
 }
