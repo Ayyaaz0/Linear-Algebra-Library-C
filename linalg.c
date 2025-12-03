@@ -155,7 +155,7 @@ void linalg_determinant(void) {
   double det = determinant_gaussian(&A);
 
   // Epsilon is just for printing aproximately zero.
-  const double EPSILON = 1e-9;
+  const double EPSILON = LINALG_EPSILON;
 
   printf("\nMatrix A:\n");
   print_labeled_matrix("A", &A);
@@ -299,17 +299,18 @@ static void swap_rows(Matrix *m, int r1, int r2) {
   }
 }
 
-static double determinant_gaussian(const Matrix *A){
+static double determinant_gaussian(const Matrix *A) {
   // Assume that matrix A is square. It is asserted for safety.
   int n = A->rows;
-  const double EPSILON = 1e-9;
+  const double EPSILON = LINALG_EPSILON;
 
   // Create a matrix copy such that original isn't modified.
   Matrix M = *A;
 
   int sign = 1;
 
-  // The main loop iterates through each column to establish the pivot and eliminate elements below it.
+  // The main loop iterates through each column to establish the pivot and
+  // eliminate elements below it.
   for (int col = 0; col < n; col++) {
     // Find the pivot row in this column
     int pivot_row = col;
@@ -338,20 +339,20 @@ static double determinant_gaussian(const Matrix *A){
     double pivot = M.data[col][col];
 
     // Eliminate rows below the pivot
-    for (int row = col + 1; row < n; row ++) {
+    for (int row = col + 1; row < n; row++) {
       double factor = M.data[row][col] / pivot;
       for (int k = col; k < n; k++) {
         M.data[row][k] -= factor * M.data[col][k];
       }
     }
   }
-  // After the main loop finishes, M is fully in upper triangular form (echelon form).
+  // After the main loop finishes, M is fully in upper triangular form (echelonform).
   printf("\nUpper triangular form:\n");
-  print_labeled_matrix("U", &M); //for debugging
+  print_labeled_matrix("U", &M); // for debugging
 
   // The determinant is sign * product of diagonal
   double det = (double)sign;
-  for (int i = 0; i < n; i++){
+  for (int i = 0; i < n; i++) {
     det *= M.data[i][i];
   }
 

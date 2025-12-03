@@ -3,6 +3,7 @@
 
 #define MAX 10  // Max rows/cols for matrices
 #define MAX_MATRICES 10 
+#define LINALG_EPSILON 1e-9
 
 typedef struct {
     int rows;
