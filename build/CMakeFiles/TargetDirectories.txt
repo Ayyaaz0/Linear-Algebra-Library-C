@@ -1,3 +1,0 @@
-/Users/ayyaaz/Desktop/Scientific-Math-Tool/build/CMakeFiles/main.out.dir
-/Users/ayyaaz/Desktop/Scientific-Math-Tool/build/CMakeFiles/edit_cache.dir
-/Users/ayyaaz/Desktop/Scientific-Math-Tool/build/CMakeFiles/rebuild_cache.dir

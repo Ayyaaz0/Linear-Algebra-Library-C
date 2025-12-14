@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/main.out.dir/main.c.o CMakeFiles/main.out.dir/input.c.o CMakeFiles/main.out.dir/linalg.c.o CMakeFiles/main.out.dir/cancel.c.o -o main.out
