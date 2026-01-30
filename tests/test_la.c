@@ -19,10 +19,11 @@ int main(void) {
     LA_AT(&B,0,0)=10; LA_AT(&B,0,1)=20;
     LA_AT(&B,1,0)=30; LA_AT(&B,1,1)=40;
 
+    // Addition test:
     if (la_add(&C, &A, &B) != LA_OK) return 2;
-
     if (!nearly_equal(LA_AT(&C,1,1), 44)) return 3;
 
+    // Transpose test:
     if (la_transpose(&T, &A) != LA_OK) return 4;
     if (!nearly_equal(LA_AT(&T,0,1), 3)) return 5; // A(1,0) -> T(0,1)
 
@@ -37,7 +38,16 @@ int main(void) {
     if (!nearly_equal(LA_AT(&M,1,0), 150)) return 9;
     if (!nearly_equal(LA_AT(&M,1,1), 220)) return 10;
 
+    // Subtraction test:
+    // A - B = [-9 -18; -27 -36]
+    Matrix S = {0};
+    if (la_sub(&S, &A, &B) != LA_OK) return 11;
+    if (!nearly_equal(LA_AT(&S,0,0), -9))  return 12;
+    if (!nearly_equal(LA_AT(&S,0,1), -18)) return 13;
+    if (!nearly_equal(LA_AT(&S,1,0), -27)) return 14;
+    if (!nearly_equal(LA_AT(&S,1,1), -36)) return 15;
 
+    la_matrix_free(&S);
     la_matrix_free(&A);
     la_matrix_free(&B);
     la_matrix_free(&C);
