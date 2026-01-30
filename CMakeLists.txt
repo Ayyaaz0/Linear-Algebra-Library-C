@@ -8,6 +8,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 add_library(la
     src/la_matrix.c
     src/la_ops.c
+    src/la_solve.c
 )
 
 target_include_directories(la PUBLIC include)
@@ -37,6 +38,7 @@ add_executable(la_cli2
     apps/la_cli.c
     src/input.c
     src/cancel.c
+    src/la_solve.c
 )
 
 target_include_directories(la_cli2 PRIVATE include)

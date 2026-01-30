@@ -2,6 +2,7 @@
 #include <math.h>
 #include "la_matrix.h"
 #include "la_ops.h"
+#include "la_solve.h"
 
 static int nearly_equal(double a, double b) {
     return fabs(a - b) < 1e-9;
@@ -10,12 +11,16 @@ static int nearly_equal(double a, double b) {
 int main(void) {
     Matrix A, B, C, T;
 
+    // Initialize matrices A and B  
     if (la_matrix_init(&A, 2, 2) != LA_OK) return 1;
     if (la_matrix_init(&B, 2, 2) != LA_OK) return 1;
 
+    // Fill matrices A and B
+    // A = [1 2; 3 4]
+    // B = [10 20; 30 40]
     LA_AT(&A,0,0)=1; LA_AT(&A,0,1)=2;
     LA_AT(&A,1,0)=3; LA_AT(&A,1,1)=4;
-
+   
     LA_AT(&B,0,0)=10; LA_AT(&B,0,1)=20;
     LA_AT(&B,1,0)=30; LA_AT(&B,1,1)=40;
 
@@ -47,6 +52,33 @@ int main(void) {
     if (!nearly_equal(LA_AT(&S,1,0), -27)) return 14;
     if (!nearly_equal(LA_AT(&S,1,1), -36)) return 15;
 
+    // Determinant test:
+    // For A = [[1,2],[3,4]], det = -2.0
+    double det = 0.0;
+    if (la_det(&det, &A) != LA_OK) return 20;
+    if (!nearly_equal(det, -2.0)) return 21;
+
+    // Solve test:  
+    // A = [[3,2],[1,2]], b = [[5],[5]]
+    Matrix A2 = {0}, b2 = {0}, x = {0};
+    if (la_matrix_init(&A2, 2, 2) != LA_OK) return 22;
+    if (la_matrix_init(&b2, 2, 1) != LA_OK) return 23;
+
+    LA_AT(&A2,0,0)=3; LA_AT(&A2,0,1)=2;
+    LA_AT(&A2,1,0)=1; LA_AT(&A2,1,1)=2;
+
+    LA_AT(&b2,0,0)=5;
+    LA_AT(&b2,1,0)=5;
+
+    if (la_solve(&x, &A2, &b2) != LA_OK) return 24;
+    if (!nearly_equal(LA_AT(&x,0,0), 0.0)) return 25;
+    if (!nearly_equal(LA_AT(&x,1,0), 2.5)) return 26;
+
+
+    // Free all matrices
+    la_matrix_free(&A2);
+    la_matrix_free(&b2);
+    la_matrix_free(&x);
     la_matrix_free(&S);
     la_matrix_free(&A);
     la_matrix_free(&B);
