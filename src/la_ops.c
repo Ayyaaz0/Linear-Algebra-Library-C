@@ -28,3 +28,22 @@ la_status la_transpose(Matrix *out, const Matrix *a) {
     }
     return LA_OK;
 }
+
+la_status la_mul(Matrix *out, const Matrix *a, const Matrix *b) {
+    if (!out || !a || !b) return LA_ERR_DIM;
+    if (a->cols != b->rows) return LA_ERR_DIM;
+
+    la_status st = la_matrix_init(out, a->rows, b->cols);
+    if (st != LA_OK) return st;
+
+    for (size_t i = 0; i < out->rows; i++) {
+        for (size_t j = 0; j < out->cols; j++) {
+            double sum = 0.0;
+            for (size_t k = 0; k < a->cols; k++) {
+                sum += LA_AT(a, i, k) * LA_AT(b, k, j);
+            }
+            LA_AT(out, i, j) = sum;
+        }
+    }
+    return LA_OK;
+}
