@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "input.h"
 #include "la_matrix.h"
 #include "la_ops.h"
+#include "la_solve.h"
 
 static void print_matrix(const Matrix *m) {
     for (size_t i = 0; i < m->rows; i++) {
         for (size_t j = 0; j < m->cols; j++) {
-            printf("%8.2f ", LA_AT(m, i, j));
+            printf("%10.4f ", LA_AT(m, i, j));
         }
         printf("\n");
     }
@@ -34,12 +36,27 @@ static la_status read_matrix(Matrix *m, const char *title) {
     return LA_OK;
 }
 
+// Read a column vector b of size n x 1
+static la_status read_vector(Matrix *b, size_t n, const char *title) {
+    printf("\n%s\n", title);
+
+    la_status st = la_matrix_init(b, n, 1);
+    if (st != LA_OK) return st;
+
+    for (size_t i = 0; i < n; i++) {
+        char prompt[64];
+        snprintf(prompt, sizeof(prompt), "  b[%zu] = ", i);
+        LA_AT(b, i, 0) = get_double(prompt);
+    }
+    return LA_OK;
+}
+
 static void do_transpose(void) {
-    Matrix A = {0}, T = {0};
+    Matrix A = (Matrix){0};
+    Matrix T = (Matrix){0};
 
     if (read_matrix(&A, "Transpose a matrix") != LA_OK) {
         printf("Failed to read matrix.\n");
-        la_matrix_free(&A);
         return;
     }
 
@@ -59,16 +76,86 @@ static void do_transpose(void) {
     la_matrix_free(&T);
 }
 
+static void do_determinant(void) {
+    Matrix A = (Matrix){0};
+    double det = 0.0;
+
+    if (read_matrix(&A, "Determinant of a matrix") != LA_OK) {
+        printf("Failed to read matrix.\n");
+        return;
+    }
+
+    if (A.rows != A.cols) {
+        printf("Matrix must be square to compute determinant.\n");
+        la_matrix_free(&A);
+        return;
+    }
+
+    la_status st = la_det(&det, &A);
+    if (st == LA_ERR_SINGULAR) {
+        printf("\ndet(A) = 0 (singular matrix)\n");
+    } else if (st != LA_OK) {
+        printf("\nDeterminant failed (error %d).\n", (int)st);
+    } else {
+        printf("\ndet(A) = %.6f\n", det);
+    }
+
+    la_matrix_free(&A);
+}
+
+static void do_solve(void) {
+    Matrix A = (Matrix){0};
+    Matrix b = (Matrix){0};
+    Matrix x = (Matrix){0};
+
+    printf("\nSolve Ax = b\n");
+
+    if (read_matrix(&A, "Enter square matrix A") != LA_OK) {
+        printf("Failed to read A.\n");
+        return;
+    }
+
+    if (A.rows != A.cols) {
+        printf("A must be square.\n");
+        la_matrix_free(&A);
+        return;
+    }
+
+    if (read_vector(&b, A.rows, "Enter vector b") != LA_OK) {
+        printf("Failed to read b.\n");
+        la_matrix_free(&A);
+        return;
+    }
+
+    la_status st = la_solve(&x, &A, &b);
+    if (st == LA_ERR_SINGULAR) {
+        printf("System is singular (no unique solution).\n");
+    } else if (st != LA_OK) {
+        printf("Solve failed (error %d).\n", (int)st);
+    } else {
+        printf("\nSolution x:\n");
+        print_matrix(&x);
+    }
+
+    la_matrix_free(&A);
+    la_matrix_free(&b);
+    la_matrix_free(&x);
+}
+
 int main(void) {
-    while (1) {
+    while (true) {
         printf("\n===== Linear Algebra Utilities (Demo CLI) =====\n");
         printf("1. Transpose\n");
+        printf("2. Determinant\n");
+        printf("3. Solve Ax = b\n");
         printf("0. Exit\n");
         printf("==============================================\n");
 
         int sel = get_int("Enter an option: ");
         switch (sel) {
-            case 1: do_transpose(); break;
+            case 1: do_transpose();   break;
+            case 2: do_determinant(); break;
+            case 3: do_solve();       break;
             case 0: return 0;
             default: printf("Unknown option.\n"); break;
         }
