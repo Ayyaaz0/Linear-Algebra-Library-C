@@ -2,6 +2,8 @@
 
 la_status la_add(Matrix *out, const Matrix *a, const Matrix *b) {
     if (!out || !a || !b) return LA_ERR_DIM;
+    if (!a->data || !b->data) return LA_ERR_DIM;
+    if (out->data != NULL) return LA_ERR_DIM;
     if (a->rows != b->rows || a->cols != b->cols) return LA_ERR_DIM;
 
     la_status st = la_matrix_init(out, a->rows, a->cols);
@@ -17,6 +19,8 @@ la_status la_add(Matrix *out, const Matrix *a, const Matrix *b) {
 
 la_status la_sub(Matrix *out, const Matrix *a, const Matrix *b) {
     if (!out || !a || !b) return LA_ERR_DIM;
+    if (!a->data || !b->data) return LA_ERR_DIM;
+    if (out->data != NULL) return LA_ERR_DIM;
     if (a->rows != b->rows || a->cols != b->cols) return LA_ERR_DIM;
 
     la_status st = la_matrix_init(out, a->rows, a->cols);
@@ -32,6 +36,8 @@ la_status la_sub(Matrix *out, const Matrix *a, const Matrix *b) {
 
 la_status la_transpose(Matrix *out, const Matrix *a) {
     if (!out || !a) return LA_ERR_DIM;
+    if (!a->data) return LA_ERR_DIM;
+    if (out->data != NULL) return LA_ERR_DIM;
 
     la_status st = la_matrix_init(out, a->cols, a->rows);
     if (st != LA_OK) return st;
@@ -46,6 +52,8 @@ la_status la_transpose(Matrix *out, const Matrix *a) {
 
 la_status la_mul(Matrix *out, const Matrix *a, const Matrix *b) {
     if (!out || !a || !b) return LA_ERR_DIM;
+    if (!a->data || !b->data) return LA_ERR_DIM;
+    if (out->data != NULL) return LA_ERR_DIM;
     if (a->cols != b->rows) return LA_ERR_DIM;
 
     la_status st = la_matrix_init(out, a->rows, b->cols);

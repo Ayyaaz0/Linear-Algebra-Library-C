@@ -3,6 +3,7 @@
 
 la_status la_matrix_init(Matrix *m, size_t rows, size_t cols) {
     if (!m || rows == 0 || cols == 0) return LA_ERR_DIM;
+    la_matrix_reset(m);
 
     m->rows = rows;
     m->cols = cols;
@@ -43,4 +44,11 @@ void la_matrix_fill(Matrix *m, double value) {
     for (size_t k = 0; k < n; k++) {
         m->data[k] = value;
     }
+}
+
+void la_matrix_reset(Matrix *m) {
+    if (!m) return;
+    m->rows = 0;
+    m->cols = 0;
+    m->data = NULL;
 }

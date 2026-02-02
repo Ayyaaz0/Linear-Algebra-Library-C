@@ -1,8 +1,7 @@
 #include "la_solve.h"
-#include <math.h>    // fabs
-#include <stdlib.h>  // NULL
+#include <math.h>   // fabs
 
-// Small tolerance for "singular"
+// Tolerance for treating a pivot as "effectively zero"
 static const double LA_EPS = 1e-12;
 
 static void swap_rows(Matrix *m, size_t r1, size_t r2) {
@@ -17,7 +16,7 @@ static void swap_rows(Matrix *m, size_t r1, size_t r2) {
 // Finds pivot row for column 'col' in rows [col..n-1] using partial pivoting.
 // Returns 1 if pivot found, 0 if column is effectively zero.
 static int find_pivot_row(const Matrix *A, size_t col, size_t *pivot_out) {
-    size_t n = A->rows;
+    const size_t n = A->rows;
     size_t pivot = col;
     double best = fabs(LA_AT(A, col, col));
 
@@ -38,19 +37,20 @@ la_status la_det(double *det_out, const Matrix *A) {
     if (!det_out || !A || !A->data) return LA_ERR_DIM;
     if (A->rows != A->cols) return LA_ERR_DIM;
 
-    Matrix M = {0};
+    Matrix M = (Matrix){0};
     la_status st = la_matrix_copy(&M, A);
     if (st != LA_OK) return st;
 
-    size_t n = M.rows;
+    const size_t n = M.rows;
     int sign = 1;
 
     for (size_t col = 0; col < n; col++) {
-        size_t pivot_row;
+        size_t pivot_row = col;
+
         if (!find_pivot_row(&M, col, &pivot_row)) {
             la_matrix_free(&M);
             *det_out = 0.0;
-            return LA_ERR_SINGULAR; // treat as singular
+            return LA_ERR_SINGULAR;
         }
 
         if (pivot_row != col) {
@@ -58,12 +58,13 @@ la_status la_det(double *det_out, const Matrix *A) {
             sign = -sign;
         }
 
-        double pivot = LA_AT(&M, col, col);
+        const double pivot = LA_AT(&M, col, col);
 
-        // Eliminate rows below
+        // Eliminate rows below pivot
         for (size_t r = col + 1; r < n; r++) {
-            double factor = LA_AT(&M, r, col) / pivot;
-            LA_AT(&M, r, col) = 0.0; // exact zero for cleanliness
+            const double factor = LA_AT(&M, r, col) / pivot;
+            LA_AT(&M, r, col) = 0.0; 
+
             for (size_t k = col + 1; k < n; k++) {
                 LA_AT(&M, r, k) -= factor * LA_AT(&M, col, k);
             }
@@ -81,15 +82,19 @@ la_status la_det(double *det_out, const Matrix *A) {
 }
 
 la_status la_solve(Matrix *x_out, const Matrix *A, const Matrix *b) {
-    if (!x_out || !A || !b || !A->data || !b->data) return LA_ERR_DIM;
-    if (A->rows != A->cols) return LA_ERR_DIM;
-    if (b->cols != 1) return LA_ERR_DIM;
-    if (b->rows != A->rows) return LA_ERR_DIM;
+    if (!x_out || !A || !b || !A->data || !b->data) return LA_ERR_DIM; 
+    if (x_out->data != NULL) return LA_ERR_DIM;
 
-    size_t n = A->rows;
+    la_matrix_reset(x_out); 
+
+    if (A->rows != A->cols) return LA_ERR_DIM;   // A must be square
+    if (b->cols != 1) return LA_ERR_DIM;         // b must be a column vector
+    if (b->rows != A->rows) return LA_ERR_DIM;   // compatible sizes
+
+    const size_t n = A->rows;
 
     // Build augmented matrix [A | b] of size n x (n+1)
-    Matrix Aug = {0};
+    Matrix Aug = (Matrix){0};
     la_status st = la_matrix_init(&Aug, n, n + 1);
     if (st != LA_OK) return st;
 
@@ -102,9 +107,9 @@ la_status la_solve(Matrix *x_out, const Matrix *A, const Matrix *b) {
 
     // Forward elimination with partial pivoting
     for (size_t col = 0; col < n; col++) {
-        // Find pivot row in this column
         size_t pivot_row = col;
         double best = fabs(LA_AT(&Aug, col, col));
+
         for (size_t r = col + 1; r < n; r++) {
             double v = fabs(LA_AT(&Aug, r, col));
             if (v > best) {
@@ -122,36 +127,42 @@ la_status la_solve(Matrix *x_out, const Matrix *A, const Matrix *b) {
             swap_rows(&Aug, pivot_row, col);
         }
 
-        double pivot = LA_AT(&Aug, col, col);
+        const double pivot = LA_AT(&Aug, col, col);
 
+        // Eliminate entries below pivot
         for (size_t r = col + 1; r < n; r++) {
-            double factor = LA_AT(&Aug, r, col) / pivot;
+            const double factor = LA_AT(&Aug, r, col) / pivot;
             LA_AT(&Aug, r, col) = 0.0;
+
             for (size_t k = col + 1; k < n + 1; k++) {
                 LA_AT(&Aug, r, k) -= factor * LA_AT(&Aug, col, k);
             }
         }
     }
 
-    // Back substitution
+    // Allocate solution vector x (n x 1)
     st = la_matrix_init(x_out, n, 1);
     if (st != LA_OK) {
         la_matrix_free(&Aug);
         return st;
     }
 
+    // Back substitution 
     for (size_t i = n; i-- > 0;) {
-        double rhs = LA_AT(&Aug, i, n);
+        const double rhs = LA_AT(&Aug, i, n);
+
         double sum = 0.0;
         for (size_t j = i + 1; j < n; j++) {
             sum += LA_AT(&Aug, i, j) * LA_AT(x_out, j, 0);
         }
-        double diag = LA_AT(&Aug, i, i);
+
+        const double diag = LA_AT(&Aug, i, i);
         if (fabs(diag) < LA_EPS) {
             la_matrix_free(&Aug);
             la_matrix_free(x_out);
             return LA_ERR_SINGULAR;
         }
+
         LA_AT(x_out, i, 0) = (rhs - sum) / diag;
     }
 

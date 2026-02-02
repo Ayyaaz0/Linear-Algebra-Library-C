@@ -26,4 +26,6 @@ void la_matrix_free(Matrix *m);
 la_status la_matrix_copy(Matrix *dst, const Matrix *src);
 void la_matrix_fill(Matrix *m, double value);
 
+void la_matrix_reset(Matrix *m);
+
 #endif
