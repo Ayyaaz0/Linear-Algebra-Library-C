@@ -8,7 +8,6 @@
 #include <limits.h>
 
 #include "input.h"
-#include "cancel.h"
 
 static void read_line(char *buffer, int size);
 static char *skip_leading_spaces(char *p);
@@ -23,13 +22,7 @@ int get_int(const char *prompt) {
         // Skip leading whitespace
         char *p = skip_leading_spaces(buffer);
 
-        // Check for cancel
-        if ((p[0] == 'c' || p[0] == 'C') && p[1] == '\0') {
-            printf("Cancelling current operation.\n");
-            trigger_cancel();
-        }
-
-        // Check for empty input?
+        // Check for empty input
         if (*p == '\0') {
             printf("No input given. Please enter an integer.\n");
             continue;
@@ -76,12 +69,6 @@ double get_double(const char *prompt) {
         // Skip leading whitespace
         char *p = skip_leading_spaces(buffer);
 
-        // Check for cancel
-        if ((p[0] == 'c' || p[0] == 'C') && p[1] == '\0') {
-            printf("Cancelling current operation.\n");
-            trigger_cancel();  
-        }
-
         // Check for empty input
         if (*p == '\0') {
             printf("No input given. Please enter a number.\n");
@@ -116,7 +103,7 @@ double get_double(const char *prompt) {
             continue;
         }
 
-        // Check for matrice entries
+        // Check for matrix entries range
         if (value < MATRIX_MIN_VALUE || value > MATRIX_MAX_VALUE) {
             printf("Please enter a value between %.2f and %.2f.\n",
                    MATRIX_MIN_VALUE, MATRIX_MAX_VALUE);
@@ -127,15 +114,14 @@ double get_double(const char *prompt) {
     }
 }
 
-int get_int_in_range(const char *prompt, int min , int max) {
-    int value;
-    while(true){
-        value = get_int(prompt);
-        if (value < min || value > max){
+int get_int_in_range(const char *prompt, int min, int max) {
+    while (true) {
+        int value = get_int(prompt);
+        if (value < min || value > max) {
             printf("Value must be between %d and %d.\n", min, max);
-        } else {
-            return value;
+            continue;
         }
+        return value;
     }
 }
 
@@ -156,4 +142,3 @@ static char *skip_leading_spaces(char *p) {
     }
     return p;
 }
-
