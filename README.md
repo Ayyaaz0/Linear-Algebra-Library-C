@@ -1,10 +1,6 @@
 # Linear Algebra Library in C
 
-A small C-based numerical tool implementing basic linear algebra routines.  
-The project contains a demo command-line interface to demonstrate functionality.  
-It also contains test cases and a benchmark for performance.
-
----
+A small C-based numerical tool implementing basic linear algebra routines.  The project contains a demo command-line interface to demonstrate functionality.  It also contains test cases and a benchmark for performance.
 
 ## Build Instructions
 
@@ -19,8 +15,6 @@ cmake --build build
 ./build/smt
 ```
 
----
-
 ## Running Tests
 
 ```bash
@@ -31,8 +25,6 @@ Expected output:
 ```
 test_la: PASS
 ```
-
----
 
 ## CLI Demo
 
@@ -45,8 +37,6 @@ A minimal CLI is provided to demonstrate library usage:
 The CLI is intentionally lightweight and exists only as a usage example.  
 All core functionality is exposed through the library API.
 
----
-
 ## Benchmark
 
 A simple benchmark is included to measure solver performance on dense systems:
@@ -54,8 +44,6 @@ A simple benchmark is included to measure solver performance on dense systems:
 ```bash
 ./build/la_benchmark
 ```
-
----
 
 ## Features
 
@@ -69,8 +57,6 @@ A simple benchmark is included to measure solver performance on dense systems:
 - Determinant computation via Gaussian elimination with partial pivoting
 - Linear system solver for Ax = b
 - Matrix inversion
-
----
 
 ## Extra Notes
 
